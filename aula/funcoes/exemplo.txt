@@ -1,0 +1,62 @@
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+// func boasVindas() {
+// 	nome := "Mateus"
+
+// 	fmt.Printf("Bem vindo %s ao sistema", nome)
+// }
+
+func boasVindas(nome string) {
+	fmt.Printf("Bem vindo %s ao sistema \n", nome)
+}
+
+func soma(numero1 int, numero2 int) int {
+	resultado := numero1 + numero2
+
+	return resultado
+}
+
+type Usuario struct {
+	Nome  string
+	Senha string
+}
+
+func Autentica(user Usuario, senha string) (string, error) {
+
+	if user.Senha != senha {
+		return "", errors.New("Senha inválida")
+	}
+
+	return user.Nome, nil
+}
+
+func main() {
+	boasVindas("Mateus")
+
+	resultadoSoma := soma(35, 15)
+	fmt.Println("Resultado da soma:", resultadoSoma)
+
+	usuario1 := Usuario{Nome: "Mateus", Senha: "123"}
+	usuario2 := Usuario{Nome: "Mateus 2", Senha: "123456"}
+
+	nome, err := Autentica(usuario1, "123")
+
+	if err != nil {
+		fmt.Println("Erro na autenticação:", err)
+	} else {
+		fmt.Println("Usuário logado:", nome)
+	}
+
+	nome, err = Autentica(usuario2, "123456")
+
+	if err != nil {
+		fmt.Println("Erro na autenticação:", err)
+	} else {
+		fmt.Println("Usuário logado:", nome)
+	}
+}

@@ -1,0 +1,20 @@
+package main
+
+import "fmt"
+
+//Um ponteiro é uma variável que armazena  o endereço de memória de outra variável
+
+func main() {
+	var numero int = 60
+	var p *int = &numero
+
+	fmt.Println(numero)
+	fmt.Println("Endereço na memoria da var numero", &numero)
+
+	fmt.Println("Valor do ponteiro p:", p)
+	fmt.Println("Valor apontado por p:", *p)
+	//Imprimir o valor no endereço armazenado em P (dereferência)
+
+	numero = 10
+	fmt.Println("Valor apontado por p ATUALIZADO:", *p)
+}

@@ -1,0 +1,57 @@
+package main
+
+import "fmt"
+
+type Animal interface {
+	EmitirSom()
+	Andar()
+}
+
+//Faz uma espécie de extends ao struct derivado da interface
+func (c Cachorro) EmitirSom() {
+	fmt.Println("au")
+}
+
+func (c Cachorro) Andar() {
+	fmt.Println("O cachorro:", c.Nome)
+	fmt.Println("O cachorro está andando")
+}
+
+//Faz uma espécie de extends ao struct derivado da interface
+func (g Gato) EmitirSom() {
+	fmt.Println("miau")
+}
+
+func (g Gato) Andar() {
+	fmt.Println("O gato:", g.Nome)
+	fmt.Println("O gato está pulando")
+}
+
+//cria os derivados da interface Animal
+type Cachorro struct {
+	Nome string
+}
+
+type Gato struct {
+	Nome string
+}
+
+//chama o método da interface
+func FazerAnimalAndar(a Animal) {
+	a.Andar()
+}
+
+func FazerEmitirSom(a Animal) {
+	a.EmitirSom()
+}
+
+func main() {
+	cachorro1 := Cachorro{Nome: "Mark"}
+	gato1 := Gato{Nome: "Barney"}
+
+	FazerEmitirSom(cachorro1)
+	FazerAnimalAndar(cachorro1)
+
+	FazerEmitirSom(gato1)
+	FazerAnimalAndar(gato1)
+}

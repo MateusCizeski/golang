@@ -1,0 +1,26 @@
+package main
+
+import "fmt"
+
+//Slices são mais flexíveis e poderosos do que arrays. Um slice não tem tanho fixo, permitindo
+//que adicione ou remove elementos dinamicamente
+
+func main() {
+	var lista []int //Declarando um slice de inteiros
+
+	fmt.Println("Slice vazio:", lista)
+
+	lista = append(lista, 10, 50, 30)
+
+	fmt.Println("Slice com valores:", lista)
+
+	myArray := [7]int{1, 2, 3, 4, 5, 6, 7}
+
+	fmt.Println("meu array:", myArray)
+
+	//Criar um slice a partir de um array existente
+
+	mySlice := myArray[0:3] //criar um slice incluindo elementos do indice 1 a 4
+
+	fmt.Println(mySlice)
+}

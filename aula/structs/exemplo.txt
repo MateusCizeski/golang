@@ -1,0 +1,28 @@
+package main
+
+import "fmt"
+
+type Pessoa struct {
+	Nome          string
+	Idade         int
+	Nacionalidade string
+}
+
+func main() {
+	mateus := Pessoa{Nome: "Mateus", Idade: 24, Nacionalidade: "Brasil"}
+	pessoa2 := Pessoa{Nome: "Mateus2", Idade: 24, Nacionalidade: "Brasil"}
+
+	fmt.Println(mateus)
+	fmt.Println(pessoa2)
+
+	pessoa2.Idade = 35
+	fmt.Println("Pessoa2 dados:", pessoa2)
+
+	pessoas := map[int]Pessoa{
+		1: {Nome: "Mateus", Idade: 24, Nacionalidade: "Brasil"},
+		2: {Nome: "Mateus2", Idade: 25, Nacionalidade: "Brasil"},
+		3: {Nome: "Mateus3", Idade: 26, Nacionalidade: "Brasil"},
+	}
+
+	fmt.Println(pessoas[2])
+}
