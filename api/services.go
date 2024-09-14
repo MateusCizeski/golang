@@ -1,11 +1,16 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
+
+type Tasks struct {
+	Id    int    `json:"id"`
+	Title string `json:"title"`
+}
 
 func RouteTest(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
@@ -15,7 +20,26 @@ func RouteTest(c *gin.Context) {
 
 // buscando todas as tarefas
 func GetAllTasks(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, taskList)
+	rows, err := DB.Query("SELECT id, title from tasks")
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+
+	defer rows.Close()
+
+	var tasks []Tasks
+
+	for rows.Next() {
+		var task Tasks
+		if err := rows.Scan(&task.Id, &task.Title); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+
+		tasks = append(tasks, task)
+	}
+
+	c.JSON(http.StatusOK, tasks)
 }
 
 // cadastro novas tarefas
@@ -23,51 +47,63 @@ func AddNewTask(c *gin.Context) {
 	var newTask Tasks
 
 	if err := c.BindJSON(&newTask); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	newTask.Id = len(taskList) + 1
-	taskList = append(taskList, newTask)
-	c.JSON(http.StatusOK, newTask)
+	result, err := DB.Exec("INSERT INTO tasks (title) VALUES (?)", newTask.Title)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	id, err := result.LastInsertId()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	newTask.Id = int(id)
+
+	c.JSON(http.StatusCreated, newTask)
 }
 
 // buscando tarefa por id
 func GetTaskById(c *gin.Context) {
 	id := c.Param("id")
 
-	for _, task := range taskList {
-		if fmt.Sprintf("%d", task.Id) == id {
-			c.JSON(http.StatusOK, task)
-			return
-		}
+	var task Tasks
+
+	row := DB.QueryRow("SELECT id, title FROM tasks WHERE id = ?", id)
+
+	if err := row.Scan(&task.Id, &task.Title); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
-	c.JSON(http.StatusNotFound, gin.H{
-		"message": "Tarefa não foi encontrada",
-	})
+	c.JSON(http.StatusOK, task)
 }
 
 // deletando tarefa por id
 func DeleteTaskById(c *gin.Context) {
 	id := c.Param("id")
 
-	for index, task := range taskList {
-		if fmt.Sprintf("%d", task.Id) == id {
-			taskList = append(taskList[:index], taskList[index+1:]...)
-			c.JSON(http.StatusOK, gin.H{"message": "Tarefa deletada com sucesso."})
-			return
-		}
+	_, err := DB.Exec("DELETE FROM tasks WHERE id = ?", id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
-	c.JSON(http.StatusNotFound, gin.H{"message": "Tarefa não encontrada."})
+	c.JSON(http.StatusOK, gin.H{"message": "Tarefa deletada com sucesso."})
 }
 
 // editar tarefa
 func UpdateTaskById(c *gin.Context) {
-	id := c.Param("id")
+	id, _ := strconv.Atoi(c.Param("id"))
+
 	var updatedTask Tasks
 
 	if err := c.BindJSON(&updatedTask); err != nil {
@@ -75,14 +111,12 @@ func UpdateTaskById(c *gin.Context) {
 		return
 	}
 
-	for index, task := range taskList {
-		if fmt.Sprintf("%d", task.Id) == id {
-			updatedTask.Id = task.Id
-			taskList[index] = updatedTask
-			c.JSON(http.StatusOK, gin.H{"message": "Tarefa atualziada com sucesso."})
-			return
-		}
+	_, err := DB.Exec("UPDATE tasks SET title = ? WHERE id = ?", updatedTask.Title, id)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
-	c.JSON(http.StatusNotFound, gin.H{"message": "Tarefa não encontrada."})
+	updatedTask.Id = id
+	c.JSON(http.StatusOK, updatedTask)
 }
